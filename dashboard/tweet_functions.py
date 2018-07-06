@@ -1,4 +1,6 @@
 # tweet processing functions
+from django.conf import settings
+import traceback
 
 def extract_hashtags(tweets):
 
@@ -15,3 +17,17 @@ def extract_hashtags(tweets):
     sorted_hashtags = sorted([{"name": key, "count": value} for key, value in hash_tags.items()], key=lambda k: k['count'], reverse=True)
 
     return sorted_hashtags
+
+
+def retrieve_tweets(user_id):
+
+    # retrieve tweets from the user account
+    try:
+        statuses = settings.TWITTER_API.GetUserTimeline(screen_name=user_id, 
+            count=settings.TWEET_CRAWL_COUNT, include_rts=False
+        )
+    except:
+        traceback.print_exc()
+        statuses = []
+
+    return statuses

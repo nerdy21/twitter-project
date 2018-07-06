@@ -1,13 +1,12 @@
-from django.shortcuts import render
-from . import forms
-from django.conf import settings
-from django.http import HttpResponse
-import json
-from django.shortcuts import render
-
-from . tweet_functions import extract_hashtags
 from datetime import datetime
+import json
+
+from django.shortcuts import render
+from django.http import HttpResponse
+from django.shortcuts import render
+from . tweet_functions import extract_hashtags, retrieve_tweets
 from . models import SearchLog
+from . import forms
 
 # Create your views here.
 def home(request):
@@ -18,18 +17,22 @@ def home(request):
     # validate form input
     if not input_form.is_valid():
         # return home page
-        return render(request, 'dashboard/charts_empty.html')
+        return render(request, 'dashboard/charts_empty.html', 
+            {"message": "Please use the search bar to find the target twitter handle."}
+        )
 
     # retrieve tweets from the user account
-    statuses = settings.TWITTER_API.GetUserTimeline(screen_name=input_form.cleaned_data['user_id'], 
-        count=settings.TWEET_CRAWL_COUNT, include_rts=False
-    )
+    statuses = retrieve_tweets(input_form.cleaned_data['user_id'])
 
     # sort the tweets based on likes
     statuses = sorted(statuses, key=lambda k: k.favorite_count, reverse=True)
 
     # extract hashtags from tweets
     hashtags = extract_hashtags(statuses)
+    if hashtags == []:
+        return render(request, 'dashboard/charts_empty.html', 
+            {"message": "Please enter a valid Twitter User ID"}
+        )
 
     # save query entry for reference
     SearchLog.objects.create(search_query=input_form.cleaned_data['user_id'],
