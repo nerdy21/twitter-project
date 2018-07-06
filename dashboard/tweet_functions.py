@@ -30,4 +30,6 @@ def retrieve_tweets(user_id):
         traceback.print_exc()
         statuses = []
 
+    #f#o
+
     return statuses
