@@ -4,7 +4,7 @@ import json
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.shortcuts import render
-from . tweet_functions import extract_hashtags, retrieve_tweets
+from . tweet_functions import extract_hashtags, retrieve_tweets, retrieve_topis
 from . models import SearchLog
 from . import forms
 
@@ -26,13 +26,16 @@ def home(request):
 
     # sort the tweets based on likes
     statuses = sorted(statuses, key=lambda k: k.favorite_count, reverse=True)
-
-    # extract hashtags from tweets
-    hashtags = extract_hashtags(statuses)
-    if hashtags == []:
+    if statuses == []:
         return render(request, 'dashboard/charts_empty.html', 
             {"message": "Please enter a valid Twitter User ID"}
         )
+
+    # extract hashtags from tweets
+    hashtags = extract_hashtags(statuses)
+    
+    # retrieve popular topics using lda
+    popular_topics = retrieve_topis(statuses)
 
     # save query entry for reference
     SearchLog.objects.create(search_query=input_form.cleaned_data['user_id'],
@@ -43,7 +46,8 @@ def home(request):
     return render(request, 'dashboard/charts.html', 
         {
             "user_name": input_form.cleaned_data['user_id'],
-            "statuses": statuses, "hashtags": hashtags
+            "statuses": statuses, "hashtags": hashtags,
+            "popular_topics": popular_topics
         }
     )
 

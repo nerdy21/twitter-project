@@ -137,21 +137,33 @@
                         </ul>
                     </div>
 
-
+                    <div class="col-md-6">
+                    	<h1 class="page-header">User's Popular Topics</h1>
+                        <ul>
+                            {% for topics in popular_topics %}
+                            <li>
+                            <!-- <a href = "https://twitter.com/hashtag/{{hashtag.name}}?src=hash"> -->
+                            <div class="msg"> {{topics}} </div>
+                            </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
 
                     <div class="col-md-6">
-                    	<h1 class="page-header">User's Popular Hashtags</h1>
-                            <ul>
-                                {% for hashtag in hashtags %}
-                                <li>
-                                <a href = "https://twitter.com/hashtag/{{hashtag.name}}?src=hash">
-                                <div class="msg"> #{{hashtag.name}} : Usage Count: {{hashtag.count}} </div>
-                               
-                                </a>
-                                </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
+                		<h1 class="page-header">User's Popular Hashtags</h1>
+                        <ul>
+                            {% for hashtag in hashtags %}
+                            <li>
+                            <a href = "https://twitter.com/hashtag/{{hashtag.name}}?src=hash">
+                            <div class="msg"> #{{hashtag.name}} : Usage Count: {{hashtag.count}} </div>
+                           
+                            </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
         </div>
 		
     </div>

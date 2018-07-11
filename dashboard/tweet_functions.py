@@ -1,6 +1,10 @@
 # tweet processing functions
-from django.conf import settings
+import re
 import traceback
+from django.conf import settings
+from . lda_functions import tokenize, get_lemma, prepare_text_for_lda, get_lda_model
+from collections import defaultdict
+
 
 def extract_hashtags(tweets):
 
@@ -30,6 +34,56 @@ def retrieve_tweets(user_id):
         traceback.print_exc()
         statuses = []
 
-    #f#o
+    tweets_list = [tweet.text for tweet in statuses]
+    #print(tweets_list)
 
     return statuses
+
+
+def retrieve_topis(tweets):
+
+    # tokenize documents
+    documents = []
+    for tweet in tweets:
+        tokens = prepare_text_for_lda(tweet.text)
+        documents.append(tokens)
+
+    # calculate token frequency
+    token_frequency = defaultdict(int)
+    for doc in documents:
+        for token in doc:
+            token_frequency[token] += 1
+
+    # filter out tokens with token_frequency 1
+    documents = [
+        [token for token in doc if token_frequency[token] > 1]
+            for doc in documents
+    ]
+
+    # sort words in documents
+    for doc in documents:
+        doc.sort()
+
+    # create the lda model using the documents
+    ldamodel = get_lda_model(documents)
+
+    # get human readable output
+    topics = ldamodel.print_topics(num_words=1)
+
+    # extract topic names from raw data
+    topic_data = {}
+    for topic in topics:
+        topic_name = re.search(r'"([^"]*)"', topic[1])
+        if topic_name:
+            if (
+                topic_name.groups()[0] in topic_data and
+                topic_data[topic_name.groups()[0]] > topic[1].replace('"%s"' % topic_name.groups()[0], "").replace('*', '')
+                ):
+                continue
+            else:
+                topic_data[topic_name.groups()[0]] = topic[1].replace('"%s"' % topic_name.groups()[0], "").replace('*', '')
+
+    # sort by probability
+    topic_names = [k for k in sorted(topic_data, key=topic_data.get, reverse=True)]
+
+    return topic_names

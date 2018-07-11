@@ -37,6 +37,8 @@ TWITTER_API = twitter.Api(
 
 TWEET_CRAWL_COUNT = 200
 
+NUM_TOPICS = 10
+
 # Application definition
 
 INSTALLED_APPS = [
